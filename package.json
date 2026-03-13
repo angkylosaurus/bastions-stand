@@ -1,0 +1,16 @@
+{
+  "name": "bastions-stand",
+  "version": "1.0.0",
+  "description": "Co-op Tower Defense for up to 4 players",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
