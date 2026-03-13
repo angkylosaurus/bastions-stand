@@ -3,12 +3,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=960, initial-scale=0.5, user-scalable=yes">
 <title>Bastion's Stand — Co-op Tower Defense</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Nunito:wght@400;600;700;800&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
-  body{background:#0a0e14;color:#e0d6c8;font-family:'Nunito',sans-serif;overflow:hidden;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  body{background:#0a0e14;color:#e0d6c8;font-family:'Nunito',sans-serif;overflow-x:hidden;overflow-y:auto;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
 
 /* ── LOBBY ── */
 #lobby{display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px;background:radial-gradient(ellipse at center,#1a1e28 0%,#0a0e14 70%);border-radius:16px;width:560px}
@@ -107,20 +107,6 @@ flex-direction:column;align-items:center;justify-content:center;gap:20px;
 
 @media(max-width:960px) and (orientation:portrait){
 #rotate-prompt{display:flex}
-}
-
-/* Landscape mobile tweaks */
-@media(max-height:500px){
-body{overflow:auto;justify-content:flex-start;padding:4px 0}
-#lobby{width:90vw;max-width:560px;padding:16px}
-#lobby h1{font-size:22px}
-#waiting{width:92vw;max-width:620px;padding:14px}
-.player-slots{grid-template-columns:1fr 1fr;gap:8px}
-#game-container{width:960px;transform-origin:top left;transform:scale(var(–game-scale,1))}
-#bottom-bar{flex-wrap:wrap;gap:3px}
-.player-panel{padding:4px 6px}
-.player-panel .pp-name{font-size:9px}
-.tower-btn{width:28px;height:28px;font-size:14px}
 }
 </style>
 
@@ -808,26 +794,6 @@ function shade(c,pct){const n=parseInt(c.replace('#',''),16);const r=Math.min(25
 
 // ─── INIT ───
 
-// Scale game container for landscape mobile
-function resizeGame() {
-  const container = document.getElementById('game-container');
-  if (!container || container.style.display === 'none') return;
-  const availW = window.innerWidth;
-  if (availW < CW) {
-    const scale = availW / CW;
-    document.documentElement.style.setProperty('--game-scale', scale);
-    container.style.transformOrigin = 'top left';
-    container.style.transform = `scale(${scale})`;
-    container.style.width = CW + 'px';
-    document.body.style.overflow = 'auto';
-  } else {
-    container.style.transform = '';
-    container.style.width = '';
-  }
-}
-window.addEventListener('resize', resizeGame);
-window.addEventListener('orientationchange', () => setTimeout(resizeGame, 200));
-
 // Canvas click with scale-aware coordinates
 canvas.addEventListener('click', (e) => {
   if (!gameState) return;
@@ -862,12 +828,6 @@ canvas.addEventListener('click', (e) => {
   if (!best) return;
   send({ type: 'placeTower', spotId: best.id, towerType: selectedTower });
 });
-
-const origShowGame = showGame;
-showGame = function() {
-  origShowGame();
-  setTimeout(resizeGame, 100);
-};
 
 connect();
 </script>
