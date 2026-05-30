@@ -7,21 +7,28 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'Public')));
 
-// Explicit fallback for root — in case static middleware misses it
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Debug route to check what files exist
-app.get('/debug', (req, res) => {
-  const fs = require('fs');
-  const publicPath = path.join(__dirname, 'public');
-  let files = [];
-  try { files = fs.readdirSync(publicPath); } catch(e) { files = ['ERROR: public folder not found - ' + e.message]; }
-  const rootFiles = fs.readdirSync(__dirname);
-  res.json({ rootFiles, publicFiles: files, publicPath });
+// Proxy Anthropic API calls so the key stays server-side
+app.post('/api/scan', async (req, res) => {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) { res.status(500).json({ error: 'ANTHROPIC_API_KEY not set' }); return; }
+  try {
+    const upstream = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(req.body),
+    });
+    const data = await upstream.json();
+    res.status(upstream.status).json(data);
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
 });
 
 const PORT = process.env.PORT || 3000;
